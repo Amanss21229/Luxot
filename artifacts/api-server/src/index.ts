@@ -33,8 +33,13 @@ bot.launch({
 }).then(() => {
   logger.info("LUXORA Telegram bot is running via long polling");
 }).catch((err: unknown) => {
-  logger.error({ err }, "Failed to launch Telegram bot");
-  process.exit(1);
+  const message = err instanceof Error ? err.message : String(err);
+  if (message.includes("409") || message.includes("Conflict")) {
+    logger.warn({ err }, "Telegram bot 409 conflict — another instance is already running. HTTP server continues.");
+  } else {
+    logger.error({ err }, "Failed to launch Telegram bot");
+    process.exit(1);
+  }
 });
 
 // Graceful shutdown
