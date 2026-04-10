@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, ShoppingCart, Eye, ExternalLink } from "lucide-react";
+import { Heart, ShoppingCart, Eye, Zap } from "lucide-react";
 import { type Product } from "@/lib/api";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
@@ -12,9 +12,17 @@ interface ProductCardProps {
   className?: string;
 }
 
+function getImageUrl(img: string): string {
+  if (!img) return "";
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  return `${base}/api/images/${encodeURIComponent(img)}`;
+}
+
 export function ProductCard({ product, className }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [pressing, setPressing] = useState(false);
   const { addItem } = useCart();
   const { toggleItem, hasItem } = useWishlist();
   const isWishlisted = hasItem(product.productId);
@@ -44,8 +52,26 @@ export function ProductCard({ product, className }: ProductCardProps) {
     window.location.href = `${base}/product/${product.productId}`;
   };
 
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (product.affiliateLink) {
+      window.open(product.affiliateLink, "_blank", "noopener,noreferrer");
+    } else {
+      addItem({
+        productId: product.productId,
+        title: product.title,
+        price: product.price,
+        affiliateLink: product.affiliateLink,
+        image: product.images?.[0],
+      });
+      const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+      window.location.href = `${base}/checkout`;
+    }
+  };
+
   const firstImage = product.images?.[0];
-  const isValidUrl = !imgError && firstImage && (firstImage.startsWith("http://") || firstImage.startsWith("https://"));
+  const imageSrc = !imgError && firstImage ? getImageUrl(firstImage) : "";
 
   return (
     <div
@@ -60,9 +86,9 @@ export function ProductCard({ product, className }: ProductCardProps) {
     >
       {/* Image */}
       <div className="relative aspect-square bg-[#0f0f0f] overflow-hidden">
-        {isValidUrl ? (
+        {imageSrc ? (
           <img
-            src={firstImage!}
+            src={imageSrc}
             alt={product.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             onError={() => setImgError(true)}
@@ -123,12 +149,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </div>
         )}
 
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xl font-bold text-amber-400">
-              ₹{product.price.toLocaleString("en-IN")}
-            </span>
-          </div>
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xl font-bold text-amber-400">
+            ₹{product.price.toLocaleString("en-IN")}
+          </span>
           <button
             onClick={handleAddToCart}
             className="text-xs bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-black font-semibold px-3 py-1.5 rounded-lg border border-amber-500/30 hover:border-amber-500 transition-all duration-200"
@@ -137,17 +161,25 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </button>
         </div>
 
-        {product.affiliateLink && (
-          <a
-            href={product.affiliateLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="mt-2.5 flex items-center gap-1 text-[11px] text-blue-400/70 hover:text-blue-400 transition-colors"
-          >
-            <ExternalLink className="w-3 h-3" /> Buy from partner site
-          </a>
-        )}
+        {/* BUY NOW 3D Button */}
+        <button
+          onClick={handleBuyNow}
+          onMouseDown={() => setPressing(true)}
+          onMouseUp={() => setPressing(false)}
+          onMouseLeave={() => setPressing(false)}
+          style={{
+            transform: pressing ? "translateY(4px)" : "translateY(0px)",
+            boxShadow: pressing
+              ? "0 2px 0 #92400e, 0 2px 4px rgba(0,0,0,0.5)"
+              : "0 6px 0 #92400e, 0 8px 12px rgba(0,0,0,0.5)",
+            background: "linear-gradient(to bottom, #fbbf24 0%, #f59e0b 50%, #d97706 100%)",
+            transition: "transform 0.1s, box-shadow 0.1s",
+          }}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-black font-black text-sm uppercase tracking-wider"
+        >
+          <Zap className="w-4 h-4" fill="currentColor" />
+          Buy Now
+        </button>
       </div>
     </div>
   );

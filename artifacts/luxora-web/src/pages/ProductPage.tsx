@@ -5,12 +5,19 @@ import { useWishlist } from "@/hooks/use-wishlist";
 import { StarRating } from "@/components/StarRating";
 import { ProductGrid } from "@/components/ProductGrid";
 import { SectionHeader } from "@/components/SectionHeader";
-import { ShoppingCart, Heart, ExternalLink, ChevronLeft, ChevronRight, Share2, Loader2, CheckCircle } from "lucide-react";
+import { ShoppingCart, Heart, ChevronLeft, ChevronRight, Share2, Loader2, CheckCircle, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 function navTo(path: string) {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   window.location.href = `${base}${path}`;
+}
+
+function getImageUrl(img: string): string {
+  if (!img) return "";
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  return `${base}/api/images/${encodeURIComponent(img)}`;
 }
 
 interface ProductPageProps {
@@ -21,6 +28,7 @@ export default function ProductPage({ productId }: ProductPageProps) {
   const [imgIndex, setImgIndex] = useState(0);
   const [qty, setQty] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [pressing, setPressing] = useState(false);
 
   const { data: product, isLoading, error } = useProduct(productId);
   const { data: reviews } = useProductReviews(productId);
@@ -48,8 +56,9 @@ export default function ProductPage({ productId }: ProductPageProps) {
   }
 
   const isWishlisted = hasItem(product.productId);
-  const validImages = product.images?.filter((img) => img.startsWith("http://") || img.startsWith("https://")) ?? [];
-  const currentImg = validImages[imgIndex];
+  const allImages = product.images ?? [];
+  const imageUrls = allImages.map(getImageUrl).filter(Boolean);
+  const currentImg = imageUrls[imgIndex];
 
   const handleAddToCart = () => {
     for (let i = 0; i < qty; i++) {
@@ -58,12 +67,29 @@ export default function ProductPage({ productId }: ProductPageProps) {
         title: product.title,
         price: product.price,
         affiliateLink: product.affiliateLink,
-        image: validImages[0],
+        image: allImages[0],
       });
     }
     setAddedToCart(true);
     toast.success("Added to cart!", { description: `${qty}x ${product.title}` });
     setTimeout(() => setAddedToCart(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    if (product.affiliateLink) {
+      window.open(product.affiliateLink, "_blank", "noopener,noreferrer");
+    } else {
+      for (let i = 0; i < qty; i++) {
+        addItem({
+          productId: product.productId,
+          title: product.title,
+          price: product.price,
+          affiliateLink: product.affiliateLink,
+          image: allImages[0],
+        });
+      }
+      navTo("/checkout");
+    }
   };
 
   const relatedFiltered = related?.filter((p) => p.productId !== product.productId).slice(0, 8) ?? [];
@@ -86,7 +112,6 @@ export default function ProductPage({ productId }: ProductPageProps) {
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-16">
           {/* Images */}
           <div className="space-y-3">
-            {/* Main image */}
             <div className="relative aspect-square bg-[#111] rounded-2xl overflow-hidden border border-[#1f1f1f]">
               {currentImg ? (
                 <img
@@ -99,16 +124,16 @@ export default function ProductPage({ productId }: ProductPageProps) {
                   <span className="text-8xl opacity-20">🛍</span>
                 </div>
               )}
-              {validImages.length > 1 && (
+              {imageUrls.length > 1 && (
                 <>
                   <button
-                    onClick={() => setImgIndex((i) => (i - 1 + validImages.length) % validImages.length)}
+                    onClick={() => setImgIndex((i) => (i - 1 + imageUrls.length) % imageUrls.length)}
                     className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-all"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={() => setImgIndex((i) => (i + 1) % validImages.length)}
+                    onClick={() => setImgIndex((i) => (i + 1) % imageUrls.length)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-all"
                   >
                     <ChevronRight className="w-5 h-5" />
@@ -116,10 +141,9 @@ export default function ProductPage({ productId }: ProductPageProps) {
                 </>
               )}
             </div>
-            {/* Thumbnails */}
-            {validImages.length > 1 && (
+            {imageUrls.length > 1 && (
               <div className="flex gap-2">
-                {validImages.map((img, i) => (
+                {imageUrls.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setImgIndex(i)}
@@ -144,7 +168,6 @@ export default function ProductPage({ productId }: ProductPageProps) {
               {product.title}
             </h1>
 
-            {/* Rating */}
             {(product.rating ?? 0) > 0 && (
               <div className="flex items-center gap-3">
                 <StarRating rating={product.rating!} size="md" showValue count={product.totalReviews} />
@@ -152,12 +175,10 @@ export default function ProductPage({ productId }: ProductPageProps) {
               </div>
             )}
 
-            {/* Price */}
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-black text-amber-400">₹{product.price.toLocaleString("en-IN")}</span>
             </div>
 
-            {/* Description */}
             <p className="text-gray-400 text-sm leading-relaxed border-t border-[#1f1f1f] pt-4">
               {product.description}
             </p>
@@ -172,14 +193,37 @@ export default function ProductPage({ productId }: ProductPageProps) {
               </div>
             </div>
 
-            {/* Actions */}
+            {/* BUY NOW 3D button */}
+            <button
+              onClick={handleBuyNow}
+              onMouseDown={() => setPressing(true)}
+              onMouseUp={() => setPressing(false)}
+              onMouseLeave={() => setPressing(false)}
+              onTouchStart={() => setPressing(true)}
+              onTouchEnd={() => setPressing(false)}
+              style={{
+                transform: pressing ? "translateY(5px)" : "translateY(0px)",
+                boxShadow: pressing
+                  ? "0 2px 0 #78350f, 0 2px 6px rgba(0,0,0,0.5)"
+                  : "0 7px 0 #78350f, 0 10px 16px rgba(0,0,0,0.5)",
+                background: "linear-gradient(to bottom, #fcd34d 0%, #f59e0b 40%, #d97706 100%)",
+                transition: "transform 0.1s ease, box-shadow 0.1s ease",
+              }}
+              className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl text-black font-black text-lg uppercase tracking-widest"
+            >
+              <Zap className="w-6 h-6" fill="currentColor" />
+              Buy Now
+              <Zap className="w-6 h-6" fill="currentColor" />
+            </button>
+
+            {/* Add to Cart + Wishlist row */}
             <div className="flex gap-3">
               <button
                 onClick={handleAddToCart}
                 className={`flex-1 flex items-center justify-center gap-2 font-bold py-3.5 px-6 rounded-xl transition-all ${
                   addedToCart
                     ? "bg-green-500 text-white"
-                    : "bg-amber-500 hover:bg-amber-400 text-black"
+                    : "bg-[#1e1e1e] hover:bg-[#252525] text-amber-400 border border-amber-500/30 hover:border-amber-500/60"
                 }`}
               >
                 {addedToCart ? <CheckCircle className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
@@ -205,18 +249,6 @@ export default function ProductPage({ productId }: ProductPageProps) {
                 <Share2 className="w-5 h-5" />
               </button>
             </div>
-
-            {/* Buy now / affiliate */}
-            {product.affiliateLink && (
-              <a
-                href={product.affiliateLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 font-medium transition-all text-sm"
-              >
-                <ExternalLink className="w-4 h-4" /> Buy from Partner Site
-              </a>
-            )}
 
             {/* Info boxes */}
             <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#1f1f1f]">
@@ -250,7 +282,6 @@ export default function ProductPage({ productId }: ProductPageProps) {
           </div>
         )}
 
-        {/* Related products */}
         {relatedFiltered.length > 0 && (
           <div>
             <SectionHeader

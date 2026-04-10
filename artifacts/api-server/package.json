@@ -19,6 +19,7 @@
     "firebase-admin": "^13.7.0",
     "pino": "^9",
     "pino-http": "^10",
+    "razorpay": "^2.9.6",
     "telegraf": "^4.16.3"
   },
   "devDependencies": {

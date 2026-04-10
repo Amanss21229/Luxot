@@ -1,12 +1,52 @@
 import { useState } from "react";
 import { useCart } from "@/hooks/use-cart";
-import { postJSON, type Order } from "@/lib/api";
-import { Loader2, CheckCircle, ShoppingBag, MapPin, User, Lock, Shield, CreditCard } from "lucide-react";
+import { fetchJSON, postJSON, type Order } from "@/lib/api";
+import { Loader2, CheckCircle, ShoppingBag, MapPin, User, Lock, Shield, CreditCard, Zap } from "lucide-react";
 import { toast } from "sonner";
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  prefill: { name: string; email: string; contact: string };
+  theme: { color: string };
+  handler: (response: RazorpayPaymentResponse) => void;
+  modal?: { ondismiss?: () => void };
+}
+
+interface RazorpayInstance {
+  open(): void;
+}
+
+interface RazorpayPaymentResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
 
 function navTo(path: string) {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   window.location.href = `${base}${path}`;
+}
+
+function loadRazorpayScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) { resolve(); return; }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Razorpay"));
+    document.body.appendChild(script);
+  });
 }
 
 interface FormData {
@@ -61,7 +101,7 @@ export default function CheckoutPage() {
     return errs;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePayNow = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) {
@@ -72,33 +112,95 @@ export default function CheckoutPage() {
 
     setLoading(true);
     try {
-      const order = await postJSON<Order>("/orders", {
-        items: items.map((item) => ({
-          productId: item.productId,
-          title: item.title,
-          price: item.price,
-          quantity: item.quantity,
-          affiliateLink: item.affiliateLink,
-        })),
-        address: {
-          line1: form.line1,
-          line2: form.line2 || undefined,
-          city: form.city,
-          state: form.state,
-          pincode: form.pincode,
-          country: "India",
+      await loadRazorpayScript();
+
+      const config = await fetchJSON<{ keyId: string }>("/payment/config");
+      if (!config.keyId) {
+        toast.error("Payment not configured. Please contact support.");
+        setLoading(false);
+        return;
+      }
+
+      const rzpOrder = await postJSON<{ id: string; amount: number; currency: string }>(
+        "/payment/create-order",
+        {
+          amount: grandTotal,
+          receipt: `order_${Date.now()}`,
+        }
+      );
+
+      setLoading(false);
+
+      const rzp = new window.Razorpay({
+        key: config.keyId,
+        amount: rzpOrder.amount,
+        currency: rzpOrder.currency,
+        name: "LUXORA",
+        description: `Order of ${items.length} item${items.length > 1 ? "s" : ""}`,
+        order_id: rzpOrder.id,
+        prefill: {
+          name: form.name,
+          email: form.email,
+          contact: form.phone,
         },
-        customerName: form.name,
-        customerPhone: form.phone,
-        customerEmail: form.email || undefined,
-        totalAmount: grandTotal,
+        theme: { color: "#f59e0b" },
+        handler: async (response: RazorpayPaymentResponse) => {
+          setLoading(true);
+          try {
+            const verification = await postJSON<{ valid: boolean }>("/payment/verify", {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+
+            if (!verification.valid) {
+              toast.error("Payment verification failed. Please contact support.");
+              setLoading(false);
+              return;
+            }
+
+            const order = await postJSON<Order>("/orders", {
+              items: items.map((item) => ({
+                productId: item.productId,
+                title: item.title,
+                price: item.price,
+                quantity: item.quantity,
+                affiliateLink: item.affiliateLink,
+              })),
+              address: {
+                line1: form.line1,
+                line2: form.line2 || undefined,
+                city: form.city,
+                state: form.state,
+                pincode: form.pincode,
+                country: "India",
+              },
+              customerName: form.name,
+              customerPhone: form.phone,
+              customerEmail: form.email || undefined,
+              totalAmount: grandTotal,
+              paymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+            });
+
+            clearCart();
+            navTo(`/order-success?orderId=${order.orderId}`);
+          } catch {
+            toast.error("Something went wrong after payment. Contact support with your payment ID: " + response.razorpay_payment_id);
+            setLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            toast("Payment cancelled. Your cart is intact.");
+          },
+        },
       });
 
-      clearCart();
-      navTo(`/order-success?orderId=${order.orderId}`);
+      rzp.open();
     } catch (err) {
-      toast.error("Failed to place order. Please try again.");
-    } finally {
+      const msg = err instanceof Error ? err.message : "Payment failed";
+      toast.error(msg);
       setLoading(false);
     }
   };
@@ -114,9 +216,13 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-black text-white mb-8">Checkout</h1>
+        <h1 className="text-3xl font-black text-white mb-2">Checkout</h1>
+        <p className="text-amber-400 text-sm font-semibold mb-8 flex items-center gap-2">
+          <Zap className="w-4 h-4" fill="currentColor" />
+          Advance payment required — 100% secure via Razorpay
+        </p>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handlePayNow}>
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Form */}
             <div className="lg:col-span-2 space-y-6">
@@ -232,13 +338,20 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Payment method */}
+              {/* Payment Info */}
               <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
                 <h2 className="text-white font-bold mb-4 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-amber-400" /> Payment Method
+                  <CreditCard className="w-5 h-5 text-amber-400" /> Payment
                 </h2>
 
-                {/* Razorpay secure badge */}
+                <div className="mb-4 flex items-start gap-3 px-4 py-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                  <Zap className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="currentColor" />
+                  <div>
+                    <p className="text-amber-400 text-sm font-bold">Advance Payment Only</p>
+                    <p className="text-gray-500 text-xs mt-0.5">We accept advance payment only. Your order will be confirmed after successful payment.</p>
+                  </div>
+                </div>
+
                 <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-green-500/5 border border-green-500/20 rounded-xl">
                   <Shield className="w-5 h-5 text-green-400 shrink-0" />
                   <div>
@@ -247,7 +360,6 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Payment options */}
                 <div className="space-y-2 mb-4">
                   {[
                     { label: "UPI (GPay, PhonePe, Paytm, etc.)", icon: "📱" },
@@ -265,9 +377,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center gap-2 pt-3 border-t border-[#1f1f1f]">
                   <Lock className="w-3.5 h-3.5 text-gray-600" />
                   <p className="text-[11px] text-gray-600">
-                    Payments are processed securely via{" "}
-                    <span className="text-gray-400 font-semibold">Razorpay</span>
-                    {" "}— India's most trusted payment gateway. You'll be redirected to complete payment after placing your order.
+                    Payments processed securely via <span className="text-gray-400 font-semibold">Razorpay</span>. Clicking "Pay Now" will open the Razorpay payment popup.
                   </p>
                 </div>
               </div>
@@ -281,8 +391,17 @@ export default function CheckoutPage() {
                   {items.map((item) => (
                     <div key={item.productId} className="flex gap-3">
                       <div className="w-12 h-12 bg-[#1a1a1a] rounded-lg overflow-hidden shrink-0">
-                        {item.image && (item.image.startsWith("http://") || item.image.startsWith("https://")) ? (
-                          <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                        {item.image ? (
+                          <img
+                            src={
+                              item.image.startsWith("http://") || item.image.startsWith("https://")
+                                ? item.image
+                                : `${import.meta.env.BASE_URL.replace(/\/$/, "")}/api/images/${encodeURIComponent(item.image)}`
+                            }
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xl opacity-30">🛍</div>
                         )}
@@ -313,17 +432,30 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                {/* PAY NOW 3D Button */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-5 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-black font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-amber-500/20"
+                  style={!loading ? {
+                    background: "linear-gradient(to bottom, #fcd34d 0%, #f59e0b 40%, #d97706 100%)",
+                    boxShadow: "0 6px 0 #78350f, 0 8px 14px rgba(0,0,0,0.5)",
+                    transition: "transform 0.1s, box-shadow 0.1s",
+                  } : {
+                    background: "linear-gradient(to bottom, #d4a017 0%, #b8860b 100%)",
+                    boxShadow: "none",
+                  }}
+                  className="w-full mt-5 disabled:opacity-70 text-black font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-base uppercase tracking-wider active:translate-y-[4px] active:shadow-none"
                 >
                   {loading ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> Placing Order...</>
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
                   ) : (
-                    <><CheckCircle className="w-5 h-5" /> Place Order</>
+                    <><Zap className="w-5 h-5" fill="currentColor" /> Pay ₹{grandTotal.toLocaleString("en-IN")} Now</>
                   )}
                 </button>
+
+                <p className="text-center text-gray-600 text-[10px] mt-3">
+                  🔒 Secure payment via Razorpay
+                </p>
               </div>
             </div>
           </div>
