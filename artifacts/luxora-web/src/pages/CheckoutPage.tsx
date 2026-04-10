@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { postJSON, type Order } from "@/lib/api";
-import { Loader2, CheckCircle, ShoppingBag, MapPin, User, Phone, Mail } from "lucide-react";
+import { Loader2, CheckCircle, ShoppingBag, MapPin, User, Lock, Shield, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
 function navTo(path: string) {
@@ -232,17 +232,43 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Payment method (info only) */}
+              {/* Payment method */}
               <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
-                <h2 className="text-white font-bold mb-4">Payment Method</h2>
-                <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                  <div className="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                  </div>
+                <h2 className="text-white font-bold mb-4 flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-amber-400" /> Payment Method
+                </h2>
+
+                {/* Razorpay secure badge */}
+                <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-green-500/5 border border-green-500/20 rounded-xl">
+                  <Shield className="w-5 h-5 text-green-400 shrink-0" />
                   <div>
-                    <p className="text-white text-sm font-medium">Cash on Delivery</p>
-                    <p className="text-gray-500 text-xs">Pay when your order arrives</p>
+                    <p className="text-green-400 text-xs font-bold">Secured by Razorpay</p>
+                    <p className="text-gray-500 text-[11px]">256-bit SSL encrypted · PCI DSS Level 1 · Your data is never stored</p>
                   </div>
+                </div>
+
+                {/* Payment options */}
+                <div className="space-y-2 mb-4">
+                  {[
+                    { label: "UPI (GPay, PhonePe, Paytm, etc.)", icon: "📱" },
+                    { label: "Credit / Debit Card (Visa, Mastercard, RuPay)", icon: "💳" },
+                    { label: "Net Banking", icon: "🏦" },
+                    { label: "Digital Wallets", icon: "👛" },
+                    { label: "EMI Options Available", icon: "📆" },
+                  ].map(({ label, icon }) => (
+                    <div key={label} className="flex items-center gap-2.5 text-sm text-gray-400">
+                      <span className="text-base">{icon}</span> {label}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 pt-3 border-t border-[#1f1f1f]">
+                  <Lock className="w-3.5 h-3.5 text-gray-600" />
+                  <p className="text-[11px] text-gray-600">
+                    Payments are processed securely via{" "}
+                    <span className="text-gray-400 font-semibold">Razorpay</span>
+                    {" "}— India's most trusted payment gateway. You'll be redirected to complete payment after placing your order.
+                  </p>
                 </div>
               </div>
             </div>

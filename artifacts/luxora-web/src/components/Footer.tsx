@@ -1,4 +1,4 @@
-import { Send, Heart, Mail, Phone, MapPin, ExternalLink } from "lucide-react";
+import { Send, Heart, Mail, Shield, Lock } from "lucide-react";
 import { CATEGORIES } from "@/lib/api";
 
 function navTo(path: string) {
@@ -6,15 +6,42 @@ function navTo(path: string) {
   window.location.href = `${base}${path}`;
 }
 
+const policyLinks = [
+  { label: "Privacy Policy", path: "/privacy-policy" },
+  { label: "Terms of Service", path: "/terms-of-service" },
+  { label: "Shipping Policy", path: "/shipping-policy" },
+  { label: "Return & Refund", path: "/return-refund" },
+  { label: "FAQ", path: "/faq" },
+];
+
 export function Footer() {
   return (
     <footer className="bg-[#0a0a0a] border-t border-[#1a1a1a] mt-16">
+      {/* Razorpay & Security trust strip */}
+      <div className="bg-gradient-to-r from-[#0e0e0e] via-[#131313] to-[#0e0e0e] border-b border-[#1a1a1a] py-4">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+          <div className="flex items-center gap-2 text-sm">
+            <Shield className="w-4 h-4 text-green-400 shrink-0" />
+            <span className="text-gray-400">100% Safe & Secure Payments via</span>
+            <span className="font-black text-white tracking-tight">Razorpay</span>
+            <span className="text-xs text-green-400 border border-green-400/30 bg-green-400/10 px-1.5 py-0.5 rounded-md">PCI DSS</span>
+          </div>
+          <div className="flex items-center gap-3">
+            {["UPI", "Cards", "Net Banking", "Wallets", "EMI"].map((m) => (
+              <span key={m} className="text-[11px] bg-[#1a1a1a] border border-[#252525] text-gray-500 px-2 py-1 rounded-md">
+                {m}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Telegram CTA */}
-      <div className="bg-gradient-to-r from-[#111] via-amber-950/20 to-[#111] border-b border-[#1a1a1a] py-8">
+      <div className="bg-gradient-to-r from-[#111] via-amber-950/10 to-[#111] border-b border-[#1a1a1a] py-8">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="text-white font-bold text-xl mb-1">Shop on Telegram Too! 🚀</h3>
-            <p className="text-gray-400 text-sm">Browse, shop, and get deals directly via our Telegram bot</p>
+            <h3 className="text-white font-bold text-xl mb-1">Also shop on Telegram 🚀</h3>
+            <p className="text-gray-400 text-sm">Same products, same prices — browse & shop in Telegram</p>
           </div>
           <a
             href="https://t.me/LuxoraShoppingBot"
@@ -39,7 +66,7 @@ export function Footer() {
               <span className="text-white font-black text-2xl tracking-tight">LUXORA</span>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed mb-4">
-              A tool of Sansa Feel. Premium shopping experience on web and Telegram.
+              A tool of Sansa Feel. Premium shopping on web & Telegram.
             </p>
             <div className="flex flex-col gap-2 text-sm text-gray-500">
               <span className="flex items-center gap-2">
@@ -53,6 +80,15 @@ export function Footer() {
               >
                 <Send className="w-4 h-4 text-blue-400" /> @LuxoraShoppingBot
               </a>
+            </div>
+
+            {/* Razorpay badge */}
+            <div className="mt-5 p-3 bg-[#0f0f0f] border border-[#1f1f1f] rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <Lock className="w-3.5 h-3.5 text-green-400" />
+                <span className="text-[11px] text-green-400 font-semibold">Secured by Razorpay</span>
+              </div>
+              <p className="text-[10px] text-gray-600 leading-relaxed">All transactions are 256-bit SSL encrypted. Your payment data is never stored on our servers.</p>
             </div>
           </div>
 
@@ -80,7 +116,7 @@ export function Footer() {
               {[
                 { label: "Home", path: "/" },
                 { label: "All Products", path: "/shop" },
-                { label: "Trending", path: "/shop?sort=trending" },
+                { label: "Trending Now", path: "/shop?sort=trending" },
                 { label: "Luxora Learn", path: "/digital" },
                 { label: "My Cart", path: "/cart" },
                 { label: "My Wishlist", path: "/wishlist" },
@@ -97,32 +133,33 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Info */}
+          {/* Legal & Info */}
           <div>
-            <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Information</h4>
+            <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Legal & Support</h4>
             <ul className="flex flex-col gap-2">
-              {[
-                "Privacy Policy",
-                "Terms of Service",
-                "Shipping Policy",
-                "Return & Refund",
-                "FAQ",
-              ].map((label) => (
-                <li key={label}>
-                  <span className="text-gray-500 hover:text-amber-400 text-sm transition-colors cursor-pointer">
+              {policyLinks.map(({ label, path }) => (
+                <li key={path}>
+                  <button
+                    onClick={() => navTo(path)}
+                    className="text-gray-500 hover:text-amber-400 text-sm transition-colors"
+                  >
                     {label}
-                  </span>
+                  </button>
                 </li>
               ))}
             </ul>
 
-            <div className="mt-6 p-3 bg-[#111] rounded-xl border border-[#1f1f1f]">
-              <p className="text-xs text-gray-600 mb-2">Secure Payments</p>
-              <div className="flex gap-2 flex-wrap">
-                {["💳 UPI", "🏦 Net Banking", "📱 Wallets"].map((m) => (
-                  <span key={m} className="text-xs bg-[#1a1a1a] text-gray-500 px-2 py-1 rounded-md">{m}</span>
-                ))}
-              </div>
+            <div className="mt-6 space-y-2">
+              {[
+                { emoji: "🚚", text: "Free delivery on ₹499+" },
+                { emoji: "↩️", text: "7-day easy returns" },
+                { emoji: "🔒", text: "Razorpay secured checkout" },
+                { emoji: "📞", text: "24/7 Telegram support" },
+              ].map(({ emoji, text }) => (
+                <div key={text} className="flex items-center gap-2 text-[11px] text-gray-600">
+                  <span>{emoji}</span> {text}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -130,8 +167,15 @@ export function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-[#1a1a1a] py-4">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-600">
-          <span>© {new Date().getFullYear()} LUXORA - A Tool of Sansa Feel. All rights reserved.</span>
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600">
+          <span>© {new Date().getFullYear()} LUXORA — A Product of Sansa Feel. All rights reserved.</span>
+          <div className="flex items-center gap-4">
+            {policyLinks.map(({ label, path }) => (
+              <button key={path} onClick={() => navTo(path)} className="hover:text-amber-400 transition-colors">
+                {label}
+              </button>
+            ))}
+          </div>
           <span className="flex items-center gap-1">Made with <Heart className="w-3 h-3 text-red-500 fill-current" /> in India</span>
         </div>
       </div>

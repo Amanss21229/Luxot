@@ -31,11 +31,16 @@ Full-featured e-commerce website at `previewPath: "/"`, port 23062.
 - `/shop/:category` — Category-specific products
 - `/product/:id` — Product detail with images, reviews, add-to-cart
 - `/cart` — Shopping cart with quantity management
-- `/checkout` — Address form (name, phone, email, full Indian address)
+- `/checkout` — Address form (name, phone, email, full Indian address) + Razorpay payment branding
 - `/order-success` — Order confirmation with order ID
 - `/wishlist` — Saved products
 - `/search` — Product search
 - `/digital` — Luxora Learn digital products
+- `/faq` — Frequently Asked Questions (interactive accordion, filterable by category)
+- `/shipping-policy` — Shipping Policy (India-wide, delivery timeline table, courier partners)
+- `/return-refund` — Return & Refund Policy (7-day returns, Razorpay refund info)
+- `/terms-of-service` — Terms of Service (Razorpay, legal, India-compliant)
+- `/privacy-policy` — Privacy Policy (IT Act 2000 compliant, Firebase/Razorpay data handling)
 
 ### Features
 - Premium dark gold theme (Amazon/Flipkart-like layout)
@@ -110,6 +115,15 @@ artifacts/api-server/src/bot/
 ## Workflows
 - `Start application` — `PORT=3000 pnpm --filter @workspace/api-server run dev` (API + Telegram bot, console)
 - `Luxora Web` — `PORT=23062 BASE_PATH=/ pnpm --filter @workspace/luxora-web run dev` (Web frontend, webview)
+
+## Render Deployment
+
+`render.yaml` is at the project root. Single web service setup:
+- **Build**: Installs deps → builds Vite frontend → builds API server
+- **Start**: Runs API server with `NODE_ENV=production` (Express serves built Vite files under `artifacts/luxora-web/dist`)
+- **Health check**: `GET /api/health`
+- **Required env vars on Render**: `TELEGRAM_BOT_TOKEN`, `FIREBASE_PROJECT_ID`, `FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`
+- **Port**: Render assigns $PORT; set `10000` as default in render.yaml
 
 ## Key Commands
 

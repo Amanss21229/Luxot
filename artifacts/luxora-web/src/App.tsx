@@ -15,6 +15,11 @@ const OrderSuccessPage = lazy(() => import("@/pages/OrderSuccessPage"));
 const WishlistPage = lazy(() => import("@/pages/WishlistPage"));
 const SearchPage = lazy(() => import("@/pages/SearchPage"));
 const DigitalStorePage = lazy(() => import("@/pages/DigitalStorePage"));
+const FAQPage = lazy(() => import("@/pages/FAQPage"));
+const ShippingPolicyPage = lazy(() => import("@/pages/ShippingPolicyPage"));
+const ReturnRefundPage = lazy(() => import("@/pages/ReturnRefundPage"));
+const TermsOfServicePage = lazy(() => import("@/pages/TermsOfServicePage"));
+const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,8 +49,8 @@ function ProductPageWrapper() {
 }
 
 function OrderSuccessWrapper() {
-  const params = new URLSearchParams(window.location.search);
-  const orderId = params.get("orderId") ?? undefined;
+  const qs = new URLSearchParams(window.location.search);
+  const orderId = qs.get("orderId") ?? undefined;
   return <OrderSuccessPage orderId={orderId} />;
 }
 
@@ -96,6 +101,11 @@ function Router() {
         <Route path="/wishlist" component={WishlistPage} />
         <Route path="/search" component={SearchPage} />
         <Route path="/digital" component={DigitalStorePage} />
+        <Route path="/faq" component={FAQPage} />
+        <Route path="/shipping-policy" component={ShippingPolicyPage} />
+        <Route path="/return-refund" component={ReturnRefundPage} />
+        <Route path="/terms-of-service" component={TermsOfServicePage} />
+        <Route path="/privacy-policy" component={PrivacyPolicyPage} />
         <Route component={NotFound} />
       </Switch>
     </AppLayout>
