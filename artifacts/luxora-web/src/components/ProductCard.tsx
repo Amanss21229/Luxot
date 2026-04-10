@@ -1,125 +1,156 @@
 import { useState } from "react";
-import { Link } from "wouter";
-import { Heart, ShoppingCart, Star, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Heart, ShoppingCart, Eye, ExternalLink } from "lucide-react";
+import { type Product } from "@/lib/api";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
-import { useToast } from "@/hooks/use-toast";
-import type { GetProductsResponseItem } from "@workspace/api-client-react";
+import { StarRating } from "./StarRating";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface ProductCardProps {
-  product: GetProductsResponseItem;
+  product: Product;
+  className?: string;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, className }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);
-  const addItem = useCart((s) => s.addItem);
+  const [hovered, setHovered] = useState(false);
+  const { addItem } = useCart();
   const { toggleItem, hasItem } = useWishlist();
-  const { toast } = useToast();
-  const inWishlist = hasItem(product.productId);
+  const isWishlisted = hasItem(product.productId);
 
-  function handleAddToCart(e: React.MouseEvent) {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
     e.preventDefault();
     addItem({
       productId: product.productId,
       title: product.title,
       price: product.price,
       affiliateLink: product.affiliateLink,
+      image: product.images?.[0],
     });
-    toast({ title: "Added to cart", description: product.title });
-  }
+    toast.success("Added to cart!", { description: product.title });
+  };
 
-  function handleWishlist(e: React.MouseEvent) {
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
     e.preventDefault();
     toggleItem(product.productId);
-    toast({
-      title: inWishlist ? "Removed from wishlist" : "Added to wishlist",
-      description: product.title,
-    });
-  }
+    toast(isWishlisted ? "Removed from wishlist" : "Saved to wishlist", { description: product.title });
+  };
 
-  const imageUrl = product.images?.[0] && !imgError ? product.images[0] : null;
-  const isValidUrl = imageUrl && (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"));
+  const handleClick = () => {
+    const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+    window.location.href = `${base}/product/${product.productId}`;
+  };
+
+  const firstImage = product.images?.[0];
+  const isValidUrl = !imgError && firstImage && (firstImage.startsWith("http://") || firstImage.startsWith("https://"));
 
   return (
-    <div className="group border border-border bg-card hover:border-foreground/30 transition-all duration-200" data-testid={`card-product-${product.productId}`}>
+    <div
+      className={cn(
+        "group relative bg-[#141414] border border-[#252525] rounded-2xl overflow-hidden cursor-pointer",
+        "transition-all duration-300 hover:border-amber-500/40 hover:shadow-xl hover:shadow-amber-900/10 hover:-translate-y-1",
+        className
+      )}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={handleClick}
+    >
       {/* Image */}
-      <Link href={`/products/${product.productId}`}>
-        <div className="relative aspect-square overflow-hidden bg-muted cursor-pointer">
-          {isValidUrl ? (
-            <img
-              src={imageUrl!}
-              alt={product.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              onError={() => setImgError(true)}
-              data-testid={`img-product-${product.productId}`}
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-muted to-muted/50">
-              <span className="text-4xl font-bold text-muted-foreground/30" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                {product.title[0]?.toUpperCase()}
-              </span>
-            </div>
-          )}
-          {/* Category badge */}
-          <div className="absolute top-2 left-2">
-            <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
-              {product.category}
-            </Badge>
-          </div>
-          {/* Wishlist button */}
-          <button
-            onClick={handleWishlist}
-            className={`absolute top-2 right-2 w-8 h-8 flex items-center justify-center transition-all ${inWishlist ? "bg-foreground text-white" : "bg-white/90 text-foreground hover:bg-foreground hover:text-white"}`}
-            data-testid={`button-wishlist-${product.productId}`}
-          >
-            <Heart className="w-4 h-4" fill={inWishlist ? "currentColor" : "none"} />
-          </button>
-        </div>
-      </Link>
-
-      {/* Info */}
-      <div className="p-3">
-        <Link href={`/products/${product.productId}`}>
-          <p className="text-sm font-medium leading-tight line-clamp-2 cursor-pointer hover:text-accent transition-colors mb-1" data-testid={`text-title-${product.productId}`}>
-            {product.title}
-          </p>
-        </Link>
-
-        {/* Rating */}
-        {product.rating != null && (
-          <div className="flex items-center gap-1 mb-2">
-            <div className="flex">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Star key={s} className="w-3 h-3" fill={s <= Math.round(product.rating!) ? "hsl(43,74%,49%)" : "none"} stroke={s <= Math.round(product.rating!) ? "hsl(43,74%,49%)" : "currentColor"} />
-              ))}
-            </div>
-            {product.totalReviews != null && (
-              <span className="text-[10px] text-muted-foreground">({product.totalReviews})</span>
-            )}
+      <div className="relative aspect-square bg-[#0f0f0f] overflow-hidden">
+        {isValidUrl ? (
+          <img
+            src={firstImage!}
+            alt={product.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1c1c1c] to-[#252525]">
+            <span className="text-6xl opacity-20">🛍</span>
           </div>
         )}
 
-        {/* Price */}
-        <p className="text-base font-bold text-foreground mb-3" data-testid={`text-price-${product.productId}`}>
-          ₹{product.price.toLocaleString("en-IN")}
-        </p>
-
-        {/* Actions */}
-        <div className="flex gap-2">
-          <Button size="sm" onClick={handleAddToCart} className="flex-1 h-8 text-xs" data-testid={`button-addcart-${product.productId}`}>
-            <ShoppingCart className="w-3 h-3 mr-1" />
-            Add to Cart
-          </Button>
-          <a href={product.affiliateLink} target="_blank" rel="noopener noreferrer" className="flex-1">
-            <Button size="sm" variant="outline" className="w-full h-8 text-xs border-accent text-accent hover:bg-accent hover:text-white" data-testid={`button-buynow-${product.productId}`}>
-              <ExternalLink className="w-3 h-3 mr-1" />
-              Buy Now
-            </Button>
-          </a>
+        {/* Hover overlay */}
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end justify-center pb-3 gap-2 transition-opacity duration-300",
+          hovered ? "opacity-100" : "opacity-0"
+        )}>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleClick(); }}
+            className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md text-white text-xs font-medium px-3 py-1.5 rounded-full border border-white/20 hover:bg-amber-500 hover:border-amber-500 transition-all"
+          >
+            <Eye className="w-3.5 h-3.5" /> View
+          </button>
+          <button
+            onClick={handleAddToCart}
+            className="flex items-center gap-1.5 bg-amber-500 text-black text-xs font-bold px-3 py-1.5 rounded-full hover:bg-amber-400 transition-all"
+          >
+            <ShoppingCart className="w-3.5 h-3.5" /> Add
+          </button>
         </div>
+
+        {/* Wishlist */}
+        <button
+          onClick={handleWishlist}
+          className={cn(
+            "absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 border",
+            isWishlisted
+              ? "bg-red-500 border-red-500 text-white"
+              : "bg-black/50 backdrop-blur-sm border-white/10 text-gray-400 hover:border-red-400 hover:text-red-400"
+          )}
+        >
+          <Heart className={cn("w-4 h-4 transition-all", isWishlisted && "fill-current scale-110")} />
+        </button>
+
+        {/* Category */}
+        <span className="absolute top-3 left-3 text-[10px] bg-black/60 backdrop-blur-sm text-amber-400 font-semibold px-2 py-0.5 rounded-full capitalize border border-amber-500/20">
+          {product.category}
+        </span>
+      </div>
+
+      {/* Info */}
+      <div className="p-4">
+        <h3 className="text-sm font-medium text-gray-100 line-clamp-2 leading-snug mb-2 group-hover:text-amber-300 transition-colors">
+          {product.title}
+        </h3>
+
+        {(product.rating ?? 0) > 0 && (
+          <div className="mb-2">
+            <StarRating rating={product.rating!} showValue count={product.totalReviews} />
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-xl font-bold text-amber-400">
+              ₹{product.price.toLocaleString("en-IN")}
+            </span>
+          </div>
+          <button
+            onClick={handleAddToCart}
+            className="text-xs bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-black font-semibold px-3 py-1.5 rounded-lg border border-amber-500/30 hover:border-amber-500 transition-all duration-200"
+          >
+            + Cart
+          </button>
+        </div>
+
+        {product.affiliateLink && (
+          <a
+            href={product.affiliateLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="mt-2.5 flex items-center gap-1 text-[11px] text-blue-400/70 hover:text-blue-400 transition-colors"
+          >
+            <ExternalLink className="w-3 h-3" /> Buy from partner site
+          </a>
+        )}
       </div>
     </div>
   );
 }
+
+export default ProductCard;
