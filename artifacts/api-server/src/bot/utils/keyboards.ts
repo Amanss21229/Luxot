@@ -178,7 +178,7 @@ export function digitalProductKeyboard(
 export function forceJoinKeyboard(
   channels: Array<{ id: string; invite?: string; title?: string }>
 ) {
-  const rows = channels.map((ch) => [
+  const rows: ReturnType<typeof Markup.button.url | typeof Markup.button.callback>[][] = channels.map((ch) => [
     Markup.button.url(
       `📢 Join: ${ch.title ?? ch.id}`,
       ch.invite ?? `https://t.me/${ch.id.replace("@", "")}`

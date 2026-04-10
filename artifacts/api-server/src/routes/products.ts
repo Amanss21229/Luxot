@@ -86,8 +86,10 @@ router.get("/products/:productId", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
     res.json(doc.data());
+    return;
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch product" });
+    return;
   }
 });
 
@@ -141,8 +143,10 @@ router.post("/products/:productId/reviews", async (req, res) => {
     });
 
     res.json(reviewData);
+    return;
   } catch (err) {
     res.status(500).json({ error: "Failed to submit review" });
+    return;
   }
 });
 

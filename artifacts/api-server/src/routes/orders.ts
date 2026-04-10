@@ -28,8 +28,10 @@ router.post("/orders", async (req, res) => {
     await db.collection("orders").doc(orderId).set(order);
 
     res.status(201).json(order);
+    return;
   } catch (err) {
     res.status(500).json({ error: "Failed to create order" });
+    return;
   }
 });
 
