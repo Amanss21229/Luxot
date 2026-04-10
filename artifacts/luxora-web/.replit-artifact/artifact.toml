@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "LUXORA - Online Shopping Platform"
+version = "1.0.0"
+id = "artifacts/luxora-web"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23062
+
+[services.development]
+run = "pnpm --filter @workspace/luxora-web run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/luxora-web", "run", "build" ]
+publicDir = "artifacts/luxora-web/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23062"
+BASE_PATH = "/"

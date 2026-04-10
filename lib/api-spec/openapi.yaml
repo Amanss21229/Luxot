@@ -1,0 +1,464 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: LUXORA Shopping Platform API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: products
+    description: Product catalog
+  - name: categories
+    description: Product categories
+  - name: digital
+    description: Digital products (Luxora Learn)
+  - name: orders
+    description: Order and checkout operations
+  - name: reviews
+    description: Product reviews
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: getProducts
+      tags: [products]
+      summary: Get all products
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/trending:
+    get:
+      operationId: getTrendingProducts
+      tags: [products]
+      summary: Get trending products sorted by clicks
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Trending products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/featured:
+    get:
+      operationId: getFeaturedProducts
+      tags: [products]
+      summary: Get featured products (newest + highest rated)
+      responses:
+        "200":
+          description: Featured products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/{productId}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a single product by ID
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+
+  /products/{productId}/reviews:
+    get:
+      operationId: getProductReviews
+      tags: [reviews]
+      summary: Get reviews for a product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reviews list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+    post:
+      operationId: submitReview
+      tags: [reviews]
+      summary: Submit a product review
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitReviewBody"
+      responses:
+        "200":
+          description: Review submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+
+  /categories:
+    get:
+      operationId: getCategories
+      tags: [categories]
+      summary: Get all product categories with product counts
+      responses:
+        "200":
+          description: Categories list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /digital-products:
+    get:
+      operationId: getDigitalProducts
+      tags: [digital]
+      summary: Get all digital products (Luxora Learn)
+      responses:
+        "200":
+          description: Digital products list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DigitalProduct"
+
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create an order with delivery address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /stats:
+    get:
+      operationId: getStats
+      tags: [products]
+      summary: Get platform stats (product count, categories, reviews)
+      responses:
+        "200":
+          description: Platform statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Product:
+      type: object
+      properties:
+        productId:
+          type: string
+        title:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+        category:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        video:
+          type: string
+          nullable: true
+        affiliateLink:
+          type: string
+        clicks:
+          type: number
+        rating:
+          type: number
+          nullable: true
+        totalReviews:
+          type: number
+          nullable: true
+        createdAt:
+          type: string
+          nullable: true
+      required:
+        - productId
+        - title
+        - price
+        - description
+        - category
+        - images
+        - affiliateLink
+
+    Review:
+      type: object
+      properties:
+        userId:
+          type: number
+        productId:
+          type: string
+        rating:
+          type: number
+        createdAt:
+          type: string
+      required:
+        - userId
+        - productId
+        - rating
+        - createdAt
+
+    SubmitReviewBody:
+      type: object
+      properties:
+        userId:
+          type: number
+        rating:
+          type: number
+      required:
+        - userId
+        - rating
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        productCount:
+          type: number
+        icon:
+          type: string
+      required:
+        - id
+        - name
+        - productCount
+        - icon
+
+    DigitalProduct:
+      type: object
+      properties:
+        productId:
+          type: string
+        title:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+        fileLink:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          nullable: true
+      required:
+        - productId
+        - title
+        - price
+        - description
+
+    CreateOrderBody:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        address:
+          $ref: "#/components/schemas/DeliveryAddress"
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        customerEmail:
+          type: string
+          nullable: true
+        totalAmount:
+          type: number
+      required:
+        - items
+        - address
+        - customerName
+        - customerPhone
+        - totalAmount
+
+    OrderItem:
+      type: object
+      properties:
+        productId:
+          type: string
+        title:
+          type: string
+        price:
+          type: number
+        affiliateLink:
+          type: string
+      required:
+        - productId
+        - title
+        - price
+        - affiliateLink
+
+    DeliveryAddress:
+      type: object
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        state:
+          type: string
+        pincode:
+          type: string
+        country:
+          type: string
+          default: "India"
+      required:
+        - line1
+        - city
+        - state
+        - pincode
+
+    Order:
+      type: object
+      properties:
+        orderId:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        address:
+          $ref: "#/components/schemas/DeliveryAddress"
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        customerEmail:
+          type: string
+          nullable: true
+        totalAmount:
+          type: number
+        status:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - orderId
+        - items
+        - address
+        - customerName
+        - customerPhone
+        - totalAmount
+        - status
+        - createdAt
+
+    PlatformStats:
+      type: object
+      properties:
+        totalProducts:
+          type: number
+        totalCategories:
+          type: number
+        totalReviews:
+          type: number
+        totalOrders:
+          type: number
+      required:
+        - totalProducts
+        - totalCategories
+        - totalReviews
+        - totalOrders

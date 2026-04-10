@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "ynAvgPZ416V-Jg6fGJkei"
+uri = "file://artifacts/luxora-web/public/hero-1.png"
+type = "image"
+title = "Luxury fashion hero banner"
+
+[[generated]]
+id = "8tk5qIC9XUU5rYGbwqtIt"
+uri = "file://artifacts/luxora-web/public/hero-2.png"
+type = "image"
+title = "Premium electronics hero banner"
+
+[[generated]]
+id = "C_0X-8Wyto1gwLT2M3oke"
+uri = "file://artifacts/luxora-web/public/hero-3.png"
+type = "image"
+title = "Luxury lifestyle banner"
