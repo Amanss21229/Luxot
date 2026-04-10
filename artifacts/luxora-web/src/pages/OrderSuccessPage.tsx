@@ -1,4 +1,4 @@
-import { CheckCircle, ShoppingBag, Home, Send } from "lucide-react";
+import { CheckCircle, ShoppingBag, Home, Send, Package } from "lucide-react";
 
 function navTo(path: string) {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -58,6 +58,13 @@ export default function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
             <ShoppingBag className="w-4 h-4" /> Shop More
           </button>
         </div>
+
+        <button
+          onClick={() => navTo("/my-orders")}
+          className="mt-3 w-full flex items-center justify-center gap-2 bg-[#111] border border-amber-500/30 hover:border-amber-500/60 text-amber-400 font-bold py-3 rounded-xl transition-all"
+        >
+          <Package className="w-4 h-4" /> Track My Orders
+        </button>
 
         <a
           href="https://t.me/LuxoraShoppingBot"

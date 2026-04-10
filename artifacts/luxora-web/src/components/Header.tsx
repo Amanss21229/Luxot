@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ShoppingCart, Heart, Search, Menu, X, ChevronDown, Send } from "lucide-react";
+import { ShoppingCart, Heart, Search, Menu, X, ChevronDown, Send, Package } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { CATEGORIES } from "@/lib/api";
@@ -85,6 +85,9 @@ export function Header() {
               </div>
               <button onClick={() => navTo("/digital")} className="text-gray-400 hover:text-white text-sm font-medium px-3 py-2 rounded-lg hover:bg-white/5 transition-all">
                 Luxora Learn
+              </button>
+              <button onClick={() => navTo("/my-orders")} className="flex items-center gap-1.5 text-gray-400 hover:text-amber-400 text-sm font-medium px-3 py-2 rounded-lg hover:bg-white/5 transition-all">
+                <Package className="w-4 h-4" /> My Orders
               </button>
             </nav>
 
@@ -181,6 +184,9 @@ export function Header() {
               </div>
             </div>
             <button onClick={() => { navTo("/digital"); setMobileMenuOpen(false); }} className="text-left text-gray-300 hover:text-amber-400 py-2 px-2 rounded-lg transition-colors font-medium border-t border-[#1a1a1a] pt-3">Luxora Learn 🎓</button>
+            <button onClick={() => { navTo("/my-orders"); setMobileMenuOpen(false); }} className="flex items-center gap-2 text-left text-amber-400 hover:text-amber-300 py-2 px-2 rounded-lg transition-colors font-medium border-t border-[#1a1a1a] pt-3">
+              <Package className="w-4 h-4" /> My Orders
+            </button>
             <a href="https://t.me/LuxoraShoppingBot" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-400 py-2 px-2 rounded-lg font-medium border-t border-[#1a1a1a] pt-3">
               <Send className="w-4 h-4" /> Open Telegram Bot
             </a>

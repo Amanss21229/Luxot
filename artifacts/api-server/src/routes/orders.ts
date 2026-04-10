@@ -3,6 +3,31 @@ import { db } from "../bot/firebase.js";
 
 const router = Router();
 
+// GET /orders?phone=XXXXXXXXXX
+router.get("/orders", async (req, res) => {
+  try {
+    const phone = String(req.query["phone"] ?? "").trim();
+    if (!phone || !/^\d{10}$/.test(phone)) {
+      res.status(400).json({ error: "Valid 10-digit phone number is required" });
+      return;
+    }
+
+    const snap = await db
+      .collection("orders")
+      .where("customerPhone", "==", phone)
+      .orderBy("createdAt", "desc")
+      .limit(50)
+      .get();
+
+    const orders = snap.docs.map((doc) => doc.data());
+    res.json(orders);
+    return;
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch orders" });
+    return;
+  }
+});
+
 // POST /orders
 router.post("/orders", async (req, res) => {
   try {

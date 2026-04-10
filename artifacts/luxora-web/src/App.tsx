@@ -20,6 +20,7 @@ const ShippingPolicyPage = lazy(() => import("@/pages/ShippingPolicyPage"));
 const ReturnRefundPage = lazy(() => import("@/pages/ReturnRefundPage"));
 const TermsOfServicePage = lazy(() => import("@/pages/TermsOfServicePage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
+const MyOrdersPage = lazy(() => import("@/pages/MyOrdersPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +107,7 @@ function Router() {
         <Route path="/return-refund" component={ReturnRefundPage} />
         <Route path="/terms-of-service" component={TermsOfServicePage} />
         <Route path="/privacy-policy" component={PrivacyPolicyPage} />
+        <Route path="/my-orders" component={MyOrdersPage} />
         <Route component={NotFound} />
       </Switch>
     </AppLayout>
