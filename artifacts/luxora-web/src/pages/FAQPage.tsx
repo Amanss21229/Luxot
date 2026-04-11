@@ -16,7 +16,7 @@ const faqs = [
       },
       {
         q: "Can I modify or cancel my order after placing it?",
-        a: "Orders can be modified or cancelled within 24 hours of placement. Contact us immediately via Telegram @LuxoraShoppingBot or email us at support@luxora.shop.",
+        a: "Orders can be modified or cancelled within 24 hours of placement. Contact us immediately via Telegram @LuxoraShoppingBot or email us at contact.sansafeel@gmail.com.",
       },
       {
         q: "Is there a minimum order value?",

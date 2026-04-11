@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ShoppingCart, Heart, Search, Menu, X, ChevronDown, Send, Package } from "lucide-react";
+import { ShoppingCart, Heart, Search, Menu, X, ChevronDown, Send, Package, Users } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { CATEGORIES } from "@/lib/api";
@@ -88,6 +88,9 @@ export function Header() {
               </button>
               <button onClick={() => navTo("/my-orders")} className="flex items-center gap-1.5 text-gray-400 hover:text-amber-400 text-sm font-medium px-3 py-2 rounded-lg hover:bg-white/5 transition-all">
                 <Package className="w-4 h-4" /> My Orders
+              </button>
+              <button onClick={() => navTo("/affiliate")} className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 text-sm font-bold px-3 py-2 rounded-lg border border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-500/5 transition-all">
+                <Users className="w-4 h-4" /> Earn ₹50/Sale
               </button>
             </nav>
 
@@ -186,6 +189,9 @@ export function Header() {
             <button onClick={() => { navTo("/digital"); setMobileMenuOpen(false); }} className="text-left text-gray-300 hover:text-amber-400 py-2 px-2 rounded-lg transition-colors font-medium border-t border-[#1a1a1a] pt-3">Luxora Learn 🎓</button>
             <button onClick={() => { navTo("/my-orders"); setMobileMenuOpen(false); }} className="flex items-center gap-2 text-left text-amber-400 hover:text-amber-300 py-2 px-2 rounded-lg transition-colors font-medium border-t border-[#1a1a1a] pt-3">
               <Package className="w-4 h-4" /> My Orders
+            </button>
+            <button onClick={() => { navTo("/affiliate"); setMobileMenuOpen(false); }} className="flex items-center gap-2 text-left text-amber-400 hover:text-amber-300 py-2 px-2 rounded-lg transition-colors font-bold border-t border-[#1a1a1a] pt-3">
+              <Users className="w-4 h-4" /> 🤝 Earn ₹50/Sale — Affiliate
             </button>
             <a href="https://t.me/LuxoraShoppingBot" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-400 py-2 px-2 rounded-lg font-medium border-t border-[#1a1a1a] pt-3">
               <Send className="w-4 h-4" /> Open Telegram Bot

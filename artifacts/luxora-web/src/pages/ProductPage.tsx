@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useProduct, useProductReviews, useProducts } from "@/hooks/use-products";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
@@ -6,6 +6,7 @@ import { StarRating } from "@/components/StarRating";
 import { ProductGrid } from "@/components/ProductGrid";
 import { SectionHeader } from "@/components/SectionHeader";
 import { ShoppingCart, Heart, ChevronLeft, ChevronRight, Share2, Loader2, CheckCircle, Zap } from "lucide-react";
+import { postJSON } from "@/lib/api";
 import { toast } from "sonner";
 
 function navTo(path: string) {
@@ -29,6 +30,16 @@ export default function ProductPage({ productId }: ProductPageProps) {
   const [qty, setQty] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const [pressing, setPressing] = useState(false);
+
+  // Affiliate ref tracking
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref && ref.startsWith("AFF-")) {
+      sessionStorage.setItem("luxora_ref", ref);
+      postJSON("/affiliate/track-click", { linkCode: ref }).catch(() => {});
+    }
+  }, []);
 
   const { data: product, isLoading, error } = useProduct(productId);
   const { data: reviews } = useProductReviews(productId);

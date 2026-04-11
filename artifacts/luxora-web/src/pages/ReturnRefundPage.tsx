@@ -53,7 +53,7 @@ export default function ReturnRefundPage() {
 
           <Section title="How to Initiate a Return">
             <ol className="list-decimal pl-5 space-y-2 mt-2">
-              <li>Contact us on Telegram @LuxoraShoppingBot or email support@luxora.shop within 7 days of delivery</li>
+              <li>Contact us on Telegram @LuxoraShoppingBot or email contact.sansafeel@gmail.com within 7 days of delivery</li>
               <li>Share your Order ID and reason for return with photos if the item is damaged</li>
               <li>Our team will review your request within 24 business hours</li>
               <li>If approved, we will arrange a pickup from your address (in select cities) or share a drop-off location</li>
@@ -87,7 +87,7 @@ export default function ReturnRefundPage() {
             <p>For any return or refund queries:</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>Telegram: @LuxoraShoppingBot (fastest response)</li>
-              <li>Email: support@luxora.shop</li>
+              <li>Email: contact.sansafeel@gmail.com</li>
             </ul>
           </Section>
         </div>

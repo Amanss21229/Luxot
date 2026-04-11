@@ -159,6 +159,7 @@ export default function CheckoutPage() {
               return;
             }
 
+            const affiliateCode = sessionStorage.getItem("luxora_ref") ?? undefined;
             const order = await postJSON<Order>("/orders", {
               items: items.map((item) => ({
                 productId: item.productId,
@@ -181,7 +182,9 @@ export default function CheckoutPage() {
               totalAmount: grandTotal,
               paymentId: response.razorpay_payment_id,
               razorpayOrderId: response.razorpay_order_id,
+              affiliateCode,
             });
+            if (affiliateCode) sessionStorage.removeItem("luxora_ref");
 
             clearCart();
             navTo(`/order-success?orderId=${order.orderId}`);

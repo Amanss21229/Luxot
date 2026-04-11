@@ -24,6 +24,15 @@ import {
   handleAdminConversation,
   adminState,
 } from "./handlers/admin.js";
+import {
+  handleAffiliateMenu,
+  handleAffiliateCreateStart,
+  handleAffiliateRegisterStart,
+  handleAffiliatePayment,
+  handleAffiliateDashboard,
+  handleAffiliateConversation,
+  affiliateState,
+} from "./handlers/affiliate.js";
 import { mainMenuKeyboard, categoriesKeyboard } from "./utils/keyboards.js";
 import { CONTACT_ADMIN_USERNAME, LUXORA_BANNER, LUXORA_FOOTER } from "./constants.js";
 
@@ -71,6 +80,12 @@ export function createBot(): Telegraf {
         if (handled) return;
       }
 
+      // Check affiliate conversation
+      if (userId && affiliateState.has(userId)) {
+        const handled = await handleAffiliateConversation(ctx, text);
+        if (handled) return;
+      }
+
       // Check if user is in search mode
       if (userId && searchAwaitingUsers.has(userId)) {
         await handleSearchQuery(ctx, text);
@@ -100,6 +115,10 @@ export function createBot(): Telegraf {
 
         case "🎓 Luxora Learn":
           await handleLuxoraLearn(ctx);
+          break;
+
+        case "🤝 Affiliate Program":
+          await handleAffiliateMenu(ctx);
           break;
 
         case "📢 Contact Admin":
@@ -218,6 +237,33 @@ export function createBot(): Telegraf {
           `${LUXORA_BANNER}\n\n_Welcome back, *${name}*\\._${LUXORA_FOOTER}`,
           { parse_mode: "MarkdownV2", ...mainMenuKeyboard() }
         );
+        return;
+      }
+
+      // Affiliate callbacks
+      if (data === "aff:menu") {
+        await ctx.answerCbQuery();
+        await handleAffiliateMenu(ctx);
+        return;
+      }
+      if (data === "aff:create") {
+        await ctx.answerCbQuery();
+        await handleAffiliateCreateStart(ctx);
+        return;
+      }
+      if (data === "aff:register") {
+        await ctx.answerCbQuery();
+        await handleAffiliateRegisterStart(ctx);
+        return;
+      }
+      if (data === "aff:payment") {
+        await ctx.answerCbQuery();
+        await handleAffiliatePayment(ctx);
+        return;
+      }
+      if (data === "aff:dashboard") {
+        await ctx.answerCbQuery();
+        await handleAffiliateDashboard(ctx);
         return;
       }
 

@@ -109,7 +109,7 @@ export default function PrivacyPolicyPage() {
               <li><strong className="text-white">Deletion:</strong> Request deletion of your personal data (subject to legal obligations)</li>
               <li><strong className="text-white">Opt-out:</strong> Unsubscribe from promotional communications at any time</li>
             </ul>
-            <p className="mt-3">To exercise any of these rights, contact us at support@luxora.shop or via Telegram @LuxoraShoppingBot.</p>
+            <p className="mt-3">To exercise any of these rights, contact us at contact.sansafeel@gmail.com or via Telegram @LuxoraShoppingBot.</p>
           </Section>
 
           <Section title="Children's Privacy">
@@ -123,7 +123,7 @@ export default function PrivacyPolicyPage() {
           <Section title="Contact Us">
             <p>For privacy-related concerns or data requests:</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>Email: support@luxora.shop</li>
+              <li>Email: contact.sansafeel@gmail.com</li>
               <li>Telegram: @LuxoraShoppingBot</li>
               <li>Brand: LUXORA — A Product of Sansa Feel</li>
             </ul>

@@ -7,6 +7,7 @@ import ordersRouter from "./orders.js";
 import statsRouter from "./stats.js";
 import imagesRouter from "./images.js";
 import paymentRouter from "./payment.js";
+import affiliateRouter from "./affiliate.js";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(ordersRouter);
 router.use(statsRouter);
 router.use(imagesRouter);
 router.use(paymentRouter);
+router.use(affiliateRouter);
 
 export default router;

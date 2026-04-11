@@ -7,7 +7,7 @@ export function mainMenuKeyboard() {
     ["🛍 Shop Products", "🔍 Search"],
     ["❤️ Wishlist", "🛒 My Cart"],
     ["📊 Trending", "🎓 Luxora Learn"],
-    ["📢 Contact Admin"],
+    ["🤝 Affiliate Program", "📢 Contact Admin"],
   ])
     .resize()
     .persistent();

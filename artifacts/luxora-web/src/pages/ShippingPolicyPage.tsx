@@ -105,7 +105,7 @@ export default function ShippingPolicyPage() {
             <p>For shipping-related queries:</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>Telegram: @LuxoraShoppingBot</li>
-              <li>Email: support@luxora.shop</li>
+              <li>Email: contact.sansafeel@gmail.com</li>
             </ul>
           </Section>
         </div>

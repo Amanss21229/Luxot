@@ -69,9 +69,12 @@ export function Footer() {
               A tool of Sansa Feel. Premium shopping on web & Telegram.
             </p>
             <div className="flex flex-col gap-2 text-sm text-gray-500">
-              <span className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-amber-500" /> support@luxora.shop
-              </span>
+              <a
+                href="mailto:contact.sansafeel@gmail.com"
+                className="flex items-center gap-2 hover:text-amber-400 transition-colors"
+              >
+                <Mail className="w-4 h-4 text-amber-500" /> contact.sansafeel@gmail.com
+              </a>
               <a
                 href="https://t.me/LuxoraShoppingBot"
                 target="_blank"
@@ -120,6 +123,8 @@ export function Footer() {
                 { label: "Luxora Learn", path: "/digital" },
                 { label: "My Cart", path: "/cart" },
                 { label: "My Wishlist", path: "/wishlist" },
+                { label: "My Orders", path: "/my-orders" },
+                { label: "🤝 Affiliate — Earn ₹50/Sale", path: "/affiliate" },
               ].map(({ label, path }) => (
                 <li key={path}>
                   <button

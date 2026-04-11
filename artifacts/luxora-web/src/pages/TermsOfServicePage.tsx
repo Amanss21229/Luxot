@@ -86,7 +86,7 @@ export default function TermsOfServicePage() {
             <p>For questions about these Terms, contact us:</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>Telegram: @LuxoraShoppingBot</li>
-              <li>Email: support@luxora.shop</li>
+              <li>Email: contact.sansafeel@gmail.com</li>
             </ul>
           </Section>
         </div>

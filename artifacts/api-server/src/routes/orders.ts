@@ -52,6 +52,37 @@ router.post("/orders", async (req, res) => {
 
     await db.collection("orders").doc(orderId).set(order);
 
+    // Affiliate attribution — if affiliateCode provided, update link stats
+    const affiliateCode = req.body.affiliateCode as string | undefined;
+    if (affiliateCode) {
+      try {
+        const linkRef = db.collection("affiliateLinks").doc(affiliateCode);
+        const linkDoc = await linkRef.get();
+        if (linkDoc.exists) {
+          const linkData = linkDoc.data()!;
+          const EARNINGS_PER_ORDER = 50;
+          const newOrders = ((linkData["orders"] as number) ?? 0) + 1;
+          const newEarnings = ((linkData["earnings"] as number) ?? 0) + EARNINGS_PER_ORDER;
+          await linkRef.update({ orders: newOrders, earnings: newEarnings });
+          // Update affiliate totals
+          const phone = linkData["affiliatePhone"] as string;
+          if (phone) {
+            const affRef = db.collection("affiliates").doc(phone);
+            const affDoc = await affRef.get();
+            if (affDoc.exists) {
+              const aff = affDoc.data()!;
+              await affRef.update({
+                totalOrders: ((aff["totalOrders"] as number) ?? 0) + 1,
+                earnings: ((aff["earnings"] as number) ?? 0) + EARNINGS_PER_ORDER,
+              });
+            }
+          }
+        }
+      } catch {
+        // Non-fatal — order still created
+      }
+    }
+
     res.status(201).json(order);
     return;
   } catch (err) {
