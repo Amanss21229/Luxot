@@ -5,6 +5,8 @@ import { Toaster } from "sonner";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Loader2 } from "lucide-react";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const HomePage = lazy(() => import("@/pages/HomePage"));
 const ShopPage = lazy(() => import("@/pages/ShopPage"));
@@ -118,23 +120,27 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <Router />
-      </WouterRouter>
-      <Toaster
-        theme="dark"
-        position="bottom-right"
-        richColors
-        toastOptions={{
-          style: {
-            background: "#1a1a1a",
-            border: "1px solid #2a2a2a",
-            color: "#fff",
-          },
-        }}
-      />
-    </QueryClientProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <QueryClientProvider client={queryClient}>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+          <Toaster
+            theme="dark"
+            position="bottom-right"
+            richColors
+            toastOptions={{
+              style: {
+                background: "#1a1a1a",
+                border: "1px solid #2a2a2a",
+                color: "#fff",
+              },
+            }}
+          />
+        </QueryClientProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 

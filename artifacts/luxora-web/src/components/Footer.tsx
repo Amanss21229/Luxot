@@ -1,5 +1,6 @@
 import { Send, Heart, Mail, Shield, Lock } from "lucide-react";
 import { CATEGORIES } from "@/lib/api";
+import { LuxoraLogoMark } from "@/components/LuxoraLogo";
 
 function navTo(path: string) {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -59,11 +60,9 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/30">
-                <span className="text-black font-black text-base">L</span>
-              </div>
-              <span className="text-white font-black text-2xl tracking-tight">LUXORA</span>
+            <div className="flex items-center gap-2.5 mb-4">
+              <LuxoraLogoMark size={40} />
+              <span className="text-white font-black text-2xl tracking-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif", letterSpacing: "0.06em" }}>LUXORA</span>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed mb-4">
               A tool of Sansa Feel. Premium shopping on web & Telegram.

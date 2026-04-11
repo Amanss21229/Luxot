@@ -13,6 +13,8 @@ pnpm workspace monorepo using TypeScript. Contains the LUXORA Telegram Shopping 
 - **API framework**: Express 5
 - **Frontend**: React 19 + Vite 7 + Tailwind CSS 4
 - **State**: Zustand (cart & wishlist)
+- **Theme**: ThemeContext (dark/light toggle, persisted in localStorage)
+- **Language**: LanguageContext (9 Indian languages + English, persisted in localStorage)
 - **Data fetching**: TanStack Query
 - **Toast**: Sonner
 - **Routing**: Wouter

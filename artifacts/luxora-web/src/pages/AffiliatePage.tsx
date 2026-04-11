@@ -258,17 +258,47 @@ export default function AffiliatePage() {
     <div className="min-h-screen bg-[#0a0a0a]">
 
       {/* Hero */}
-      <div className="bg-gradient-to-b from-amber-950/20 to-transparent border-b border-[#1a1a1a]">
-        <div className="max-w-5xl mx-auto px-4 py-14 text-center">
+      <div className="bg-gradient-to-b from-amber-950/30 via-amber-950/10 to-transparent border-b border-[#1a1a1a]">
+        <div className="max-w-5xl mx-auto px-4 py-16 text-center">
           <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold px-4 py-2 rounded-full mb-5">
             <DollarSign className="w-4 h-4" /> Affiliate Partner Program
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
             Earn <span className="text-amber-400">₹{EARNINGS_PER_SALE}</span> Per Sale
           </h1>
+
+          {/* Earnings highlight banner */}
+          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500/15 via-emerald-500/10 to-green-500/15 border border-green-500/30 rounded-2xl px-6 py-4 mb-6 mt-2">
+            <span className="text-2xl">💰</span>
+            <div className="text-left">
+              <p className="text-green-400 font-black text-xl md:text-2xl leading-tight">
+                Earn ₹15,000 – ₹20,000/month
+              </p>
+              <p className="text-gray-400 text-sm mt-0.5">
+                Just 10–15 sales/day through your affiliate links — that's all it takes!
+              </p>
+            </div>
+          </div>
+
           <p className="text-gray-400 text-lg max-w-xl mx-auto mb-8">
             Share LUXORA products with your audience. Get a unique affiliate link and earn ₹{EARNINGS_PER_SALE} every time someone buys through it.
           </p>
+
+          {/* How much can you earn calculator-style */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {[
+              { sales: "5 sales/day", monthly: "₹7,500/month" },
+              { sales: "10 sales/day", monthly: "₹15,000/month" },
+              { sales: "15 sales/day", monthly: "₹22,500/month" },
+              { sales: "20 sales/day", monthly: "₹30,000/month" },
+            ].map(({ sales, monthly }) => (
+              <div key={sales} className="bg-[#111] border border-amber-500/20 rounded-xl px-4 py-3 text-center min-w-[130px]">
+                <p className="text-amber-400 font-black text-base">{monthly}</p>
+                <p className="text-gray-500 text-xs mt-0.5">{sales}</p>
+              </div>
+            ))}
+          </div>
+
           <div className="flex flex-wrap justify-center gap-6">
             {[
               { icon: <Link2 className="w-5 h-5" />, text: "Unique link per product" },
